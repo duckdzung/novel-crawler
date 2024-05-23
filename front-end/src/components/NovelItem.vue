@@ -7,7 +7,13 @@
     </div>
     <div class="col-9">
       <h3 class="novel-title">
-        <a :href="novelUrl">{{ novel.title }}</a>
+        <router-link
+          class="navbar-brand"
+          :to="`/detail/${novelUrl}`"
+          style="font-weight: bold"
+        >
+          {{ novel.title }}
+        </router-link>
       </h3>
       <h2 class="novel-author">
         <span>{{ novel.author }}</span>
@@ -27,7 +33,7 @@ export default {
   },
   computed: {
     novelUrl() {
-      return `https://truyenfull.vn/${this.convertToSlug(this.novel.title)}/`;
+      return `${this.convertToSlug(this.novel.title)}`;
     },
   },
   methods: {

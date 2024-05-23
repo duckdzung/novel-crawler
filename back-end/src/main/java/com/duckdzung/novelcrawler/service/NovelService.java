@@ -263,11 +263,13 @@ public class NovelService {
             Elements liElements = paginationUl.select("li");
             Element lastPageLi = liElements.get(liElements.size() - 2);
 
-            // Trích xuất văn bản từ thẻ <a> trong thẻ <li> cuối cùng
-            String lastPageText = lastPageLi.selectFirst("a").text();
+            String lastPageHref = lastPageLi.selectFirst("a").attr("href");
+
+            // Tách số trang từ thuộc tính href
+            String lastPageNumber = lastPageHref.replaceAll("^.*trang-(\\d+).*$", "$1");
 
             // Lấy ra số trang từ văn bản trích xuất
-            int totalPages = Integer.parseInt(lastPageText);
+            int totalPages = Integer.parseInt(lastPageNumber);
 
             pageableData.setContent(Collections.singletonList(novel));
             pageableData.setTotalPages(totalPages);

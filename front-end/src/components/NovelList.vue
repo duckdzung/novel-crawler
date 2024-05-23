@@ -33,7 +33,6 @@ export default {
     ...mapActions(["fetchNovelList"]),
   },
   async mounted() {
-    console.log("params: ", this.$route.params);
     await this.fetchNovelList();
   },
 };

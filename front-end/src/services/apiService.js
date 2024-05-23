@@ -26,3 +26,15 @@ export const searchNovel = async (searchText, page) => {
     throw error;
   }
 };
+
+export const getNovelDetail = async (novelName, page) => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/novels/detail?novelName=${novelName}&page=${page}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    throw error;
+  }
+};
