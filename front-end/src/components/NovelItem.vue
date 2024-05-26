@@ -23,6 +23,8 @@
 </template>
 
 <script>
+import { convertToSlug } from "@/utils";
+
 export default {
   name: "NovelItem",
   props: {
@@ -31,48 +33,13 @@ export default {
       required: true,
     },
   },
+
   computed: {
     novelUrl() {
-      return `${this.convertToSlug(this.novel.title)}`;
+      return convertToSlug(this.novel.title);
     },
   },
-  methods: {
-    removeVietnameseTones(str) {
-      var accentsMap = new Map([
-        ["a", "áàạảãâấầậẩẫăắằặẳẵ"],
-        ["e", "éèẹẻẽêếềệểễ"],
-        ["i", "íìịỉĩ"],
-        ["o", "óòọỏõôốồộổỗơớờợởỡ"],
-        ["u", "úùụủũưứừựửữ"],
-        ["y", "ýỳỵỷỹ"],
-        ["d", "đ"],
-      ]);
-
-      for (let [char, accents] of accentsMap) {
-        for (let accent of accents) {
-          str = str.replaceAll(accent, char);
-          str = str.replaceAll(accent.toUpperCase(), char.toUpperCase());
-        }
-      }
-
-      return str;
-    },
-    convertToSlug(str) {
-      // Remove Vietnamese tones
-      str = this.removeVietnameseTones(str);
-
-      // Convert to lower case
-      str = str.toLowerCase();
-
-      // Replace spaces with hyphens
-      str = str.replace(/\s+/g, "-");
-
-      // Remove all non-alphanumeric characters except for hyphens
-      str = str.replace(/[^a-z0-9-]/g, "");
-
-      return str;
-    },
-  },
+  methods: {},
 };
 </script>
 

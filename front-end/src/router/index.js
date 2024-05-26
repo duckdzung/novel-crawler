@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "../components/HomePage.vue";
 import NovelDetail from "../components/NovelDetail.vue";
+import NovelChapter from "../components/NovelChapter.vue";
 
 const routes = [
   {
@@ -19,9 +20,9 @@ const routes = [
     component: NovelDetail,
   },
   {
-    path: "/detail/chapter/:chapterNumber",
-    name: "DetailNovel",
-    component: NovelDetail,
+    path: "/detail/:novelName/:chapterNumber",
+    name: "NovelChapter",
+    component: NovelChapter,
   },
 ];
 

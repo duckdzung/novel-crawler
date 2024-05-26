@@ -1,15 +1,8 @@
 import { createStore } from "vuex";
 import { getAllNovels, searchNovel } from "@/services/apiService";
+import { scrollToTopSmooth } from "@/utils";
 
 const initialCurrenPage = 1;
-
-const scrollToTopSmooth = () => {
-  window.scrollTo({
-    top: 0,
-    left: 0,
-    behavior: "smooth",
-  });
-};
 
 export default createStore({
   state: {
@@ -44,9 +37,6 @@ export default createStore({
       await dispatch("fetchNovelList");
     },
     async updateSearchText({ commit, dispatch }, searchText) {
-      searchText = searchText.replace(/\s{2,}/g, " ").trim();
-      searchText = searchText.replace(/\s/g, "+");
-
       commit("SET_SEARCH_TEXT", searchText);
       commit("SET_CURRENT_PAGE", initialCurrenPage);
 
@@ -57,6 +47,8 @@ export default createStore({
       }
     },
     async fetchNovelList({ commit }) {
+      commit("SET_SEARCH_TEXT", "");
+
       const respose = await getAllNovels(
         this.state.filter,
         this.state.currrentPage

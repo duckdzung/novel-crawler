@@ -82,6 +82,7 @@
             type="search"
             placeholder="Search"
             aria-label="Search"
+            :value="searchText"
           />
           <button class="btn btn-outline-success" type="submit">Search</button>
         </form>
@@ -91,13 +92,17 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "HeaderComponent",
+  computed: {
+    ...mapState(["searchText"]),
+  },
   methods: {
     ...mapActions(["updateSearchText", "updateFilter"]),
-    handleSearch() {
+    async handleSearch() {
+      await this.$router.push("/");
       const searchText = this.$refs.searchInput.value.trim();
       this.updateSearchText(searchText);
     },
