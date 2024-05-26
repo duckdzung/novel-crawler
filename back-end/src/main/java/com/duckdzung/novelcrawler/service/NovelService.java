@@ -17,8 +17,8 @@ import java.util.List;
 @Service
 public class NovelService {
 
-    public PageableData<Novel> getALlNovels(String filter, int page) {
-        PageableData<Novel> pageableData = new  PageableData<Novel>();
+    public PageableData<Novel> getAllNovels(String filter, int page) {
+        PageableData<Novel> pageableData = new PageableData<Novel>();
         List<Novel> novelList = new ArrayList<>();
 
         try {
@@ -27,14 +27,14 @@ public class NovelService {
 
             Document doc = Jsoup.connect(url).get();
 
-            // Select element <div class="list-truyen">
+            // Select the element <div class="list-truyen">
             Element listTruyenDiv = doc.selectFirst("div.list-truyen");
 
-            // Select all elements have class that equals row
+            // Select all elements with class equals to "row"
             if (listTruyenDiv != null) {
-                Elements rowlElements = listTruyenDiv.select("div.row");
+                Elements rowElements = listTruyenDiv.select("div.row");
 
-                for (Element row : rowlElements) {
+                for (Element row : rowElements) {
                     Novel newNovel = new Novel();
 
                     // Get cover URL from novel
@@ -66,20 +66,20 @@ public class NovelService {
             // Get totalPages
             Element paginationUl = doc.selectFirst("ul.pagination.pagination-sm");
 
-            // Nếu tìm thấy phần tử pagination
+            // If the pagination element is found
             if (paginationUl != null) {
-                // Chọn tất cả các phần tử <a> bên trong
+                // Select all <a> elements inside
                 Elements pageLinks = paginationUl.select("a");
 
-                // Nếu có ít nhất một phần tử <a>
+                // If there is at least one <a> element
                 if (!pageLinks.isEmpty()) {
-                    // Lấy phần tử cuối cùng
+                    // Get the second last element
                     Element lastPageLink = pageLinks.get(pageLinks.size() - 2);
 
-                    // Lấy giá trị của thuộc tính href từ phần tử này
+                    // Get the value of the href attribute from this element
                     String lastPageHref = lastPageLink.attr("href");
 
-                    // Lấy ra số trang từ URL
+                    // Extract the number of pages from the URL
                     String[] parts = lastPageHref.split("/");
                     String totalPagesStr = parts[parts.length - 1];
                     totalPagesStr = totalPagesStr.replace("trang-", "").replace("/", "");
@@ -100,7 +100,7 @@ public class NovelService {
     }
 
     public PageableData<Novel> searchNovel(String searchText, int page) {
-        PageableData<Novel> pageableData = new  PageableData<Novel>();
+        PageableData<Novel> pageableData = new PageableData<Novel>();
         List<Novel> novelList = new ArrayList<>();
 
         try {
@@ -109,14 +109,14 @@ public class NovelService {
 
             Document doc = Jsoup.connect(url).get();
 
-            // Select element <div class="list-truyen">
+            // Select the element <div class="list-truyen">
             Element listTruyenDiv = doc.selectFirst("div.list-truyen");
 
-            // Select all elements have class that equals row
+            // Select all elements with class equals to "row"
             if (listTruyenDiv != null) {
-                Elements rowlElements = listTruyenDiv.select("div.row");
+                Elements rowElements = listTruyenDiv.select("div.row");
 
-                for (Element row : rowlElements) {
+                for (Element row : rowElements) {
                     Novel newNovel = new Novel();
 
                     // Get cover URL from novel
@@ -148,17 +148,17 @@ public class NovelService {
             // Get totalPages
             Element paginationUl = doc.selectFirst("ul.pagination.pagination-sm");
 
-            // Nếu tìm thấy phần tử pagination
+            // If the pagination element is found
             if (paginationUl != null) {
-                // Chọn tất cả các phần tử <a> bên trong
+                // Select all <a> elements inside
                 Elements pageLinks = paginationUl.select("a");
 
-                // Nếu có ít nhất một phần tử <a>
+                // If there is at least one <a> element
                 if (!pageLinks.isEmpty()) {
-                    // Lấy phần tử cuối cùng
+                    // Get the second last element
                     Element lastPageLink = pageLinks.get(pageLinks.size() - 2);
 
-                    // Lấy giá trị của thuộc tính href từ phần tử này
+                    // Get the value of the href attribute from this element
                     String lastPageHref = lastPageLink.attr("href");
 
                     int totalPages = 1;
@@ -189,7 +189,7 @@ public class NovelService {
     public PageableData<Novel> getNovelDetail(String novelName, int page) {
         String baseUrl = "https://truyenfull.vn";
         Novel novel = new Novel();
-        PageableData<Novel> pageableData = new  PageableData<Novel>();
+        PageableData<Novel> pageableData = new PageableData<Novel>();
 
         try {
             String url = String.format("%s/%s/trang-%d/#list-chapter", baseUrl, novelName, page);
@@ -201,7 +201,7 @@ public class NovelService {
                 String title = novelInfoDiv.selectFirst("h3.title").text();
                 novel.setTitle(title);
 
-                // Set coverUrl
+                // Set cover URL
                 Element imgElement = novelInfoDiv.selectFirst("div.book img");
                 if (imgElement != null) {
                     String coverUrl = imgElement.attr("src");
@@ -234,7 +234,6 @@ public class NovelService {
                 // Set description
                 Element descriptionElement = novelInfoDiv.selectFirst("div.desc div.desc-text");
                 if (descriptionElement != null) {
-//                    String description = descriptionElement.text();
                     novel.setDescription(descriptionElement.toString());
                 }
             }
@@ -242,33 +241,32 @@ public class NovelService {
             // Get chapter list
             Element listChapterDiv = doc.selectFirst("#list-chapter");
             if (listChapterDiv != null) {
-                // Lấy danh sách các phần tử li
+                // Get the list of <li> elements
                 Elements chapterElements = listChapterDiv.select("ul.list-chapter li");
                 List<String> chapters = new ArrayList<>();
                 for (Element chapterElement : chapterElements) {
-                    // Trích xuất thông tin về số chương và tiêu đề của chương
-//                    String chapterUrl = chapterElement.selectFirst("a").attr("href");
+                    // Extract information about the chapter number and title
                     String chapterTitle = chapterElement.selectFirst("a").text();
-                    // Tạo đối tượng chương và thêm vào danh sách
+                    // Create chapter object and add to list
                     chapters.add(chapterTitle);
                 }
-                // Lưu danh sách chương vào đối tượng truyện
+                // Save chapter list to novel object
                 novel.setChapters(chapters);
             }
 
-            // Get total pages of chaper ist
+            // Get total pages of chapter list
             Element paginationUl = doc.selectFirst("ul.pagination.pagination-sm");
 
-            // Lấy ra thẻ <li> cuối cùng trong thẻ <ul>
+            // Get the last <li> element in the <ul>
             Elements liElements = paginationUl.select("li");
             Element lastPageLi = liElements.get(liElements.size() - 2);
 
             String lastPageHref = lastPageLi.selectFirst("a").attr("href");
 
-            // Tách số trang từ thuộc tính href
+            // Extract the page number from the href attribute
             String lastPageNumber = lastPageHref.replaceAll("^.*trang-(\\d+).*$", "$1");
 
-            // Lấy ra số trang từ văn bản trích xuất
+            // Extract the page number from the text
             int totalPages = Integer.parseInt(lastPageNumber);
 
             pageableData.setContent(Collections.singletonList(novel));
@@ -301,11 +299,11 @@ public class NovelService {
                 chapterNovel.setChapterTitle(chapterTitle);
             }
 
-            // Get content chapter novel
+            // Get content of the chapter novel
             Element chapterContentDiv = doc.selectFirst("div#chapter-c");
             if (chapterContentDiv != null) {
                 chapterContentDiv.select(".ads-responsive").remove();
-                String chapterContent =chapterContentDiv.html();
+                String chapterContent = chapterContentDiv.html();
                 chapterNovel.setChapterContent(chapterContent);
             }
         } catch (Exception e) {

@@ -26,7 +26,7 @@ public class NovelController {
             @RequestParam(defaultValue = "truyen-hot") String filter,
             @RequestParam(defaultValue = "1") int page
     ) {
-        PageableData<Novel> pageableData = novelService.getALlNovels(filter, page);
+        PageableData<Novel> pageableData = novelService.getAllNovels(filter, page);
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .statusCode(HttpStatus.OK.value())
