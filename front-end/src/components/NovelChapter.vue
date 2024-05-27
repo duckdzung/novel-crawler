@@ -110,6 +110,14 @@
                 </select>
               </li>
             </ul>
+
+            <button
+              type="button"
+              class="btn btn-success"
+              @click="handleDownloadChapter"
+            >
+              Tải xuống
+            </button>
           </div>
         </div>
         <br />
@@ -211,6 +219,12 @@ export default {
     handleFontSizeIncrease() {
       const currentFontSize = parseFloat(this.fontSize) || 16;
       this.fontSize = Math.min(currentFontSize + 2, 32) + "px"; // Ensure maximum font size
+    },
+    handleDownloadChapter() {
+      window.open(
+        `http://localhost:8080/api/novels/export?novelName=${this.novelName}&chapterNumber=${this.chapterNumber}`,
+        "_blank"
+      );
     },
   },
   async mounted() {

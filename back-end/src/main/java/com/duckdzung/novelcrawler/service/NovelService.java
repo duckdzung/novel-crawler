@@ -4,6 +4,12 @@ import com.duckdzung.novelcrawler.common.PageableData;
 import com.duckdzung.novelcrawler.entity.Novel;
 import com.duckdzung.novelcrawler.entity.ChapterNovel;
 import com.duckdzung.novelcrawler.exception.InternalServerErrorException;
+import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.layout.element.Text;
+import com.itextpdf.layout.property.TextAlignment;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,6 +17,9 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -320,55 +329,67 @@ public class NovelService {
 
     public byte[] exportChapterToPdf(String novelName, int chapterNumber) {
         String baseUrl = "https://truyenfull.vn";
-        ChapterNovel chapterNovel = new ChapterNovel();
         try {
             String url = String.format("%s/%s/chuong-%d", baseUrl, novelName, chapterNumber);
             Document doc = Jsoup.connect(url).get();
 
-            // Get title
+            // Get novel title
+            String novelTitle = "";
             Element novelTitleElement = doc.selectFirst("a.truyen-title");
             if (novelTitleElement != null) {
-                String novelTitle = novelTitleElement.text();
-                chapterNovel.setNovelTitle(novelTitle);
+                novelTitle = novelTitleElement.text();
             }
 
-            // Get chapter number
+            // Get chapter title
+            String chapterTitle = "";
             Element chapterTitleElement = doc.selectFirst("h2 a.chapter-title");
             if (chapterTitleElement != null) {
-                String chapterTitle = chapterTitleElement.text();
-                chapterNovel.setChapterTitle(chapterTitle);
+                chapterTitle = chapterTitleElement.text();
             }
 
-            // Get content of the chapter novel
+            // Get chapter content
+            String chapterContent = "";
             Element chapterContentDiv = doc.selectFirst("div#chapter-c");
             if (chapterContentDiv != null) {
                 chapterContentDiv.select(".ads-responsive").remove();
-                String chapterContent = chapterContentDiv.html();
-                chapterNovel.setChapterContent(chapterContent);
+                chapterContent = chapterContentDiv.text();
             }
 
-            // Export to pdf
+            // Export to PDF
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-            PdfDocument pdfDocument = new PdfDocument(new PdfWriter(outputStream));
-            Document document = new Document(pdfDocument.toString());
+            PdfWriter writer = new PdfWriter(outputStream);
+            PdfDocument pdfDocument = new PdfDocument(writer);
+
+            // Load the font supporting Vietnamese characters
+            String fontPath = "src/main/resources/times.ttf"; // Đường dẫn tới file font trong thư mục resources
+            byte[] fontBytes = Files.readAllBytes(Paths.get(fontPath));
+            PdfFont font = PdfFontFactory.createFont(fontBytes, PdfEncodings.IDENTITY_H, true);
+
+            com.itextpdf.layout.Document pdfDoc = new com.itextpdf.layout.Document(pdfDocument);
+
+            // Set the font for paragraphs
+            pdfDoc.setFont(font);
 
             // Add novel title
-            document.add(new Paragraph("Novel Title: " + novelTitle));
+            Text novelTitleText = new Text(novelTitle).setFont(font).setBold().setFontSize(18);
+            Paragraph novelTitleParagraph = new Paragraph(novelTitleText).setTextAlignment(TextAlignment.CENTER);
+            pdfDoc.add(novelTitleParagraph);
 
             // Add chapter title
-            document.add(new Paragraph("Chapter Title: " + chapterTitle));
+            Text chapterTitleText = new Text(chapterTitle).setFont(font).setBold().setFontSize(15);
+            Paragraph chapterTitleParagraph = new Paragraph(chapterTitleText).setTextAlignment(TextAlignment.CENTER);
+            pdfDoc.add(chapterTitleParagraph);
 
             // Add chapter content
-            document.add(new Paragraph(chapterContent));
+            Paragraph chapterContentParagraph = new Paragraph(chapterContent).setFont(font).setFontSize(12);
+            pdfDoc.add(chapterContentParagraph);
 
-            document.close();
+            pdfDoc.close();
 
             return outputStream.toByteArray();
         } catch (Exception e) {
             throw new InternalServerErrorException(e.getMessage());
         }
-
-        return chapterNovel;
     }
 }
