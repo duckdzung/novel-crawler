@@ -1,13 +1,16 @@
 <template>
-  <div class="container">
+  <div class="container" v-if="!isLoading">
     <NovelItem
       v-for="(novel, index) in novelList"
       :key="index"
       :novel="novel"
     />
+
     <h2 v-if="!novelList" class="not-found-text">
       Không có truyện nào được tìm thấy
     </h2>
+
+    <h2 v-if="isLoading" class="not-found-text">Đang tải ...</h2>
 
     <PaginationComponent v-if="totalPages > 1" />
   </div>
@@ -19,6 +22,11 @@ import PaginationComponent from "./Pagination";
 
 export default {
   name: "NovelList",
+  data() {
+    return {
+      isLoading: true,
+    };
+  },
   components: {
     NovelItem,
     PaginationComponent,
@@ -33,7 +41,9 @@ export default {
     ...mapActions(["fetchNovelList"]),
   },
   async mounted() {
+    this.isLoading = true;
     await this.fetchNovelList();
+    this.isLoading = false;
   },
 };
 </script>

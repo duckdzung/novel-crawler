@@ -2,11 +2,7 @@
   <div v-if="!isLoading" id="chapter-big-container" class="container chapter">
     <div class="row">
       <div class="col-12">
-        <router-link
-          class="truyen-title"
-          :to="novelUrl"
-          title="Kiều Sủng Vi Thượng"
-        >
+        <router-link class="truyen-title" :to="novelUrl">
           {{ novelTitle }}
         </router-link>
         <h2>
@@ -134,6 +130,7 @@
 
 <script>
 import { getNovelChapter } from "@/services/apiService";
+import { mapActions } from "vuex";
 
 export default {
   name: "NovelChapter",
@@ -170,6 +167,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions(["updateReadingState"]),
     async getNovelChapter() {
       // Call api get novel chapter
       const response = await getNovelChapter(
@@ -182,6 +180,13 @@ export default {
       this.novelTitle = response.data.novelTitle;
       this.chapterTitle = response.data.chapterTitle;
       this.isLoading = false;
+
+      // Update reading state of novel
+      this.updateReadingState({
+        novelName: this.novelTitle,
+        novelUrl: this.$route.params.novelName,
+        chapterNumber: this.chapterNumber,
+      });
     },
     async handleClickNextChap() {
       const newChapterNumber = parseInt(this.chapterNumber) + 1;

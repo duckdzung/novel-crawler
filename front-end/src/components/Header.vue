@@ -80,12 +80,20 @@
             ref="searchInput"
             class="form-control me-2"
             type="search"
-            placeholder="Search"
+            placeholder="Nhập ở đây ..."
             aria-label="Search"
             :value="searchText"
           />
           <button class="btn btn-outline-success" type="submit">Search</button>
         </form>
+
+        <router-link
+          :to="{ name: 'ReadingHistory' }"
+          type="button"
+          class="btn btn-secondary ms-2"
+        >
+          Lịch sử
+        </router-link>
       </div>
     </div>
   </nav>

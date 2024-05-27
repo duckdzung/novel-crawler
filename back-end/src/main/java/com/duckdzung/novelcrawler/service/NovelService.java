@@ -10,9 +10,14 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.element.Paragraph;
 
 @Service
 public class NovelService {
@@ -313,4 +318,57 @@ public class NovelService {
         return chapterNovel;
     }
 
+    public byte[] exportChapterToPdf(String novelName, int chapterNumber) {
+        String baseUrl = "https://truyenfull.vn";
+        ChapterNovel chapterNovel = new ChapterNovel();
+        try {
+            String url = String.format("%s/%s/chuong-%d", baseUrl, novelName, chapterNumber);
+            Document doc = Jsoup.connect(url).get();
+
+            // Get title
+            Element novelTitleElement = doc.selectFirst("a.truyen-title");
+            if (novelTitleElement != null) {
+                String novelTitle = novelTitleElement.text();
+                chapterNovel.setNovelTitle(novelTitle);
+            }
+
+            // Get chapter number
+            Element chapterTitleElement = doc.selectFirst("h2 a.chapter-title");
+            if (chapterTitleElement != null) {
+                String chapterTitle = chapterTitleElement.text();
+                chapterNovel.setChapterTitle(chapterTitle);
+            }
+
+            // Get content of the chapter novel
+            Element chapterContentDiv = doc.selectFirst("div#chapter-c");
+            if (chapterContentDiv != null) {
+                chapterContentDiv.select(".ads-responsive").remove();
+                String chapterContent = chapterContentDiv.html();
+                chapterNovel.setChapterContent(chapterContent);
+            }
+
+            // Export to pdf
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+            PdfDocument pdfDocument = new PdfDocument(new PdfWriter(outputStream));
+            Document document = new Document(pdfDocument.toString());
+
+            // Add novel title
+            document.add(new Paragraph("Novel Title: " + novelTitle));
+
+            // Add chapter title
+            document.add(new Paragraph("Chapter Title: " + chapterTitle));
+
+            // Add chapter content
+            document.add(new Paragraph(chapterContent));
+
+            document.close();
+
+            return outputStream.toByteArray();
+        } catch (Exception e) {
+            throw new InternalServerErrorException(e.getMessage());
+        }
+
+        return chapterNovel;
+    }
 }

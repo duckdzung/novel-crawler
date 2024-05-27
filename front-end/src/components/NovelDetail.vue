@@ -82,6 +82,7 @@ import { getNovelDetail } from "@/services/apiService";
 import { scrollToTopSmooth } from "@/utils";
 import VPagination from "@hennge/vue3-pagination";
 import "@hennge/vue3-pagination/dist/vue3-pagination.css";
+import { mapActions } from "vuex";
 
 export default {
   name: "NovelDetail",
@@ -97,6 +98,7 @@ export default {
     };
   },
   methods: {
+    ...mapActions(["updateReadingState"]),
     async fetchNovelDetail() {
       const novelName = this.$route.params.novelName;
       const respone = await getNovelDetail(novelName, this.currentPage);
@@ -121,6 +123,13 @@ export default {
   },
   async mounted() {
     await this.fetchNovelDetail();
+
+    // Update reading state of novel
+    this.updateReadingState({
+      novelName: this.novel.title,
+      novelUrl: this.$route.params.novelName,
+      coverUrl: this.novel.coverUrl,
+    });
   },
   watch: {
     async currentPage() {

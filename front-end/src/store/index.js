@@ -1,4 +1,7 @@
 import { createStore } from "vuex";
+import createPersistedState from "vuex-persistedstate";
+import { v4 as uuidv4 } from "uuid"; // Import thư viện uuid
+
 import { getAllNovels, searchNovel } from "@/services/apiService";
 import { scrollToTopSmooth } from "@/utils";
 
@@ -11,6 +14,7 @@ export default createStore({
     searchText: "",
     totalPages: 1,
     currrentPage: initialCurrenPage,
+    readingState: [],
   },
   mutations: {
     SET_NOVEL_LIST(state, novelList) {
@@ -27,6 +31,31 @@ export default createStore({
     },
     SET_CURRENT_PAGE(state, currentPage) {
       state.currrentPage = currentPage;
+    },
+    SET_READING_STATE(state, { novelId, novelState }) {
+      const { novelName, novelUrl, coverUrl, chapterNumber } = novelState;
+      console.log(novelId);
+      const existingNovelIndex = state.readingState.findIndex(
+        (novel) => novel.novelName === novelName
+      );
+
+      if (existingNovelIndex !== -1) {
+        // If novel is found, update the existing entry
+        if (chapterNumber) {
+          state.readingState[existingNovelIndex] = {
+            ...state.readingState[existingNovelIndex],
+            chapterNumber: chapterNumber,
+          };
+        }
+      } else {
+        // If novel is not found, add a new entry
+        state.readingState.push({
+          novelName,
+          novelUrl,
+          coverUrl,
+          chapterNumber,
+        });
+      }
     },
   },
   actions: {
@@ -86,6 +115,13 @@ export default createStore({
         await dispatch("fetchNovelList");
       }
     },
+    updateReadingState(
+      { commit },
+      { novelName, novelUrl, coverUrl, chapterNumber }
+    ) {
+      const novelState = { novelName, novelUrl, coverUrl, chapterNumber };
+      commit("SET_READING_STATE", { novelId: uuidv4(), novelState });
+    },
   },
   getters: {
     filter: (state) => state.filter,
@@ -93,5 +129,8 @@ export default createStore({
     novelList: (state) => state.novelList,
     totalPages: (state) => state.totalPages,
     currentPage: (state) => state.currrentPage,
+    readingState: (state) => state.readingState,
+    getReadingState: (state) => (novelId) => state.readingState[novelId],
   },
+  plugins: [createPersistedState()],
 });
