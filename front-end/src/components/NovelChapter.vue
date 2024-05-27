@@ -2,24 +2,19 @@
   <div v-if="!isLoading" id="chapter-big-container" class="container chapter">
     <div class="row">
       <div class="col-12">
-        <router-link class="truyen-title" :to="novelUrl">
+        <router-link
+          class="truyen-title"
+          :to="{ name: 'NovelDetail', params: { novelName } }"
+        >
           {{ novelTitle }}
         </router-link>
         <h2>
           <span class="chapter-title">
-            <span class="chapter-text">
-              {{ chapterTitle }}
-            </span>
+            <span class="chapter-text">{{ chapterTitle }}</span>
           </span>
         </h2>
         <hr class="chapter-start" />
         <div class="chapter-nav" id="chapter-nav-top">
-          <input type="hidden" id="ten-truyen" value="kieu-sung-vi-thuong" />
-          <input
-            type="hidden"
-            id="truyen-comment"
-            value="kieu-sung-vi-thuong"
-          />
           <div class="btn-group">
             <button
               class="btn btn-success btn-chapter-nav me-1"
@@ -50,18 +45,21 @@
             </button>
             <ul class="dropdown-menu">
               <li>
-                <button class="dropdown-item" @click="handleFontSizeDecrease">
-                  Giảm cỡ chữ
-                </button>
+                <label for="font-size-input" class="dropdown-item"
+                  >Chọn cỡ chữ:</label
+                >
+                <input
+                  type="number"
+                  min="10"
+                  max="30"
+                  id="font-size-input"
+                  class="form-control"
+                  v-model="fontSize"
+                />
               </li>
-              <li>
-                <button class="dropdown-item" @click="handleFontSizeIncrease">
-                  Tăng cỡ chữ
-                </button>
-              </li>
-              <li>
-                <hr class="dropdown-divider" />
-              </li>
+
+              <li><hr class="dropdown-divider" /></li>
+
               <li>
                 <label for="font-family-select" class="dropdown-item"
                   >Chọn font chữ:</label
@@ -71,16 +69,16 @@
                   class="form-select"
                   v-model="fontFamily"
                 >
-                  <option value="Arial, sans-serif" selected>Arial</option>
+                  <option value="Arial, sans-serif">Arial</option>
                   <option value="Times New Roman, serif">
                     Times New Roman
                   </option>
                   <option value="Courier New, monospace">Courier New</option>
                 </select>
               </li>
-              <li>
-                <hr class="dropdown-divider" />
-              </li>
+
+              <li><hr class="dropdown-divider" /></li>
+
               <li>
                 <label for="font-color-picker" class="dropdown-item"
                   >Chọn màu chữ:</label
@@ -88,12 +86,13 @@
                 <input
                   type="color"
                   id="font-color-picker"
+                  class="form-control"
                   v-model="fontColor"
                 />
               </li>
-              <li>
-                <hr class="dropdown-divider" />
-              </li>
+
+              <li><hr class="dropdown-divider" /></li>
+
               <li>
                 <label for="line-height-select" class="dropdown-item"
                   >Chọn khoảng cách dòng:</label
@@ -102,7 +101,6 @@
                   id="line-height-select"
                   class="form-select"
                   v-model="lineHeight"
-                  @change="handleLineHeightChange"
                 >
                   <option value="1.0">1.0</option>
                   <option value="1.2">1.2</option>
@@ -148,10 +146,10 @@ export default {
       novelTitle: "",
       chapterTitle: "",
       isLoading: true,
-      fontSize: "",
-      fontFamily: "Arial",
-      fontColor: "",
-      lineHeight: "",
+      fontSize: 15,
+      fontFamily: "Arial, sans-serif",
+      fontColor: "#000",
+      lineHeight: "1.5",
     };
   },
   computed: {
@@ -161,64 +159,49 @@ export default {
     chapterNumber() {
       return this.$route.params.chapterNumber;
     },
-    novelUrl() {
-      return "./";
-    },
     contentStyle() {
-      const contentStyle = {
-        fontSize: this.fontSize || "16px", // Set default font size
-        fontFamily: this.fontFamily || "Arial, sans-serif", // Set default font family
-        color: this.fontColor || "#000", // Set default font color
-        lineHeight: this.lineHeight || "1.5", // Set default line height
+      return {
+        fontSize: `${this.fontSize}px`,
+        fontFamily: this.fontFamily,
+        color: this.fontColor,
+        lineHeight: this.lineHeight,
       };
-      return contentStyle;
     },
   },
   methods: {
     ...mapActions(["updateReadingState"]),
     async getNovelChapter() {
-      // Call api get novel chapter
-      const response = await getNovelChapter(
-        this.novelName,
-        this.chapterNumber
-      );
+      try {
+        const response = await getNovelChapter(
+          this.novelName,
+          this.chapterNumber
+        );
+        this.content = response.data.chapterContent;
+        this.novelTitle = response.data.novelTitle;
+        this.chapterTitle = response.data.chapterTitle;
+        this.isLoading = false;
 
-      // Set response to state
-      this.content = response.data.chapterContent;
-      this.novelTitle = response.data.novelTitle;
-      this.chapterTitle = response.data.chapterTitle;
-      this.isLoading = false;
-
-      // Update reading state of novel
-      this.updateReadingState({
-        novelName: this.novelTitle,
-        novelUrl: this.$route.params.novelName,
-        chapterNumber: this.chapterNumber,
-      });
+        this.updateReadingState({
+          novelName: this.novelTitle,
+          novelUrl: this.$route.params.novelName,
+          chapterNumber: this.chapterNumber,
+        });
+      } catch (error) {
+        console.error("Failed to load chapter:", error);
+      }
     },
-    async handleClickNextChap() {
+    async changeChapter(newChapterNumber) {
+      this.isLoading = true;
+      await this.$router.push({ params: { chapterNumber: newChapterNumber } });
+      await this.getNovelChapter();
+    },
+    handleClickNextChap() {
       const newChapterNumber = parseInt(this.chapterNumber) + 1;
-      this.isLoading = true;
-
-      await this.$router.push("./" + newChapterNumber);
-
-      await this.getNovelChapter();
+      this.changeChapter(newChapterNumber);
     },
-    async handleClickPreviousChap() {
+    handleClickPreviousChap() {
       const newChapterNumber = parseInt(this.chapterNumber) - 1;
-      this.isLoading = true;
-
-      await this.$router.push("./" + newChapterNumber);
-
-      await this.getNovelChapter();
-    },
-    handleFontSizeDecrease() {
-      const currentFontSize = parseFloat(this.fontSize) || 16;
-      this.fontSize = Math.max(currentFontSize - 2, 8) + "px"; // Ensure minimum font size
-    },
-    handleFontSizeIncrease() {
-      const currentFontSize = parseFloat(this.fontSize) || 16;
-      this.fontSize = Math.min(currentFontSize + 2, 32) + "px"; // Ensure maximum font size
+      this.changeChapter(newChapterNumber);
     },
     handleDownloadChapter() {
       window.open(

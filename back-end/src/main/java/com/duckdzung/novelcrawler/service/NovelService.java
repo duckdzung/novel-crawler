@@ -5,7 +5,6 @@ import com.duckdzung.novelcrawler.entity.Novel;
 import com.duckdzung.novelcrawler.entity.ChapterNovel;
 import com.duckdzung.novelcrawler.exception.InternalServerErrorException;
 import com.itextpdf.io.font.PdfEncodings;
-import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.layout.element.Text;
@@ -17,7 +16,6 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -77,7 +75,7 @@ public class NovelService {
                 }
             }
 
-            // Get totalPages
+            // Get total pages
             Element paginationUl = doc.selectFirst("ul.pagination.pagination-sm");
 
             // If the pagination element is found
@@ -261,9 +259,9 @@ public class NovelService {
                 for (Element chapterElement : chapterElements) {
                     // Extract information about the chapter number and title
                     String chapterTitle = chapterElement.selectFirst("a").text();
-                    // Create chapter object and add to list
                     chapters.add(chapterTitle);
                 }
+
                 // Save chapter list to novel object
                 novel.setChapters(chapters);
             }
@@ -362,7 +360,7 @@ public class NovelService {
             PdfDocument pdfDocument = new PdfDocument(writer);
 
             // Load the font supporting Vietnamese characters
-            String fontPath = "src/main/resources/times.ttf"; // Đường dẫn tới file font trong thư mục resources
+            String fontPath = "src/main/resources/times.ttf";
             byte[] fontBytes = Files.readAllBytes(Paths.get(fontPath));
             PdfFont font = PdfFontFactory.createFont(fontBytes, PdfEncodings.IDENTITY_H, true);
 
