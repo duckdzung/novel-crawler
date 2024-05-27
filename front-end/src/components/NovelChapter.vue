@@ -212,6 +212,22 @@ export default {
   },
   async mounted() {
     await this.getNovelChapter();
+    // Lấy giá trị từ local storage nếu có
+    const contentStyle = JSON.parse(localStorage.getItem("contentStyle"));
+    if (contentStyle) {
+      this.fontSize = parseInt(contentStyle.fontSize);
+      this.fontFamily = contentStyle.fontFamily;
+      this.fontColor = contentStyle.fontColor;
+      this.lineHeight = contentStyle.lineHeight;
+    }
+  },
+  watch: {
+    contentStyle: {
+      handler(newVal) {
+        localStorage.setItem("contentStyle", JSON.stringify(newVal));
+      },
+      deep: true,
+    },
   },
 };
 </script>
